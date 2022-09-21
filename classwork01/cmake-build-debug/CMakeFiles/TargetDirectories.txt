@@ -1,0 +1,3 @@
+C:/Users/edem2/3_sem_cpp/classwork02/cmake-build-debug/CMakeFiles/classwork02.dir
+C:/Users/edem2/3_sem_cpp/classwork02/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/edem2/3_sem_cpp/classwork02/cmake-build-debug/CMakeFiles/rebuild_cache.dir
