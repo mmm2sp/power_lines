@@ -36,23 +36,13 @@ public:
 };
 
 class SetState: public State {
-private:
-    std::set<int> states;
-
 public:
+    std::set<int> states;
     SetState(): states() { }
     SetState(std::set<int> const &src): states(src) { }
 
     bool contains(int s) const override{
         return states.count(s) > 0;
-    }
-
-    //возможный вариант создавать новые объекты на основе старых
-    SetState& operator+(const SetState& other){
-        std::set<int> new_states;
-        std::set_union(states.begin(), states.end(), other.states.begin(), other.states.end(), new_states.begin());
-        SetState res (new_states);
-        return res;
     }
 };
 
@@ -108,6 +98,11 @@ int main(int argc, const char * argv[]) {
     SegmentState s(0,10); // 11 элементов
     SetState ss({1, 3, 5, 7, 23, 48, 57, 60, 90, 99}); // 10 элементов
     ProbabilityTest pt(5,0,100,5); // 101 элемент
+
+    //проверка, что комлексное состояние работает
+    Set_Segment complex (s, ss);
+    std::cout << complex.contains(5) << '\n';
+    std::cout << complex.contains(99) << '\n';
 
     int n = 20;
     int step = 10000;
