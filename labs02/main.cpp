@@ -8,7 +8,6 @@
 class State{
 public:
     virtual bool contains(int s) const=0;
-
 };
 
 class DiscreteState: public State{
@@ -38,7 +37,7 @@ public:
 
 class SetState: public State {
 private:
-    std::set<int> const states;
+    std::set<int> states;
 
 public:
     SetState(): states() { }
@@ -46,6 +45,39 @@ public:
 
     bool contains(int s) const override{
         return states.count(s) > 0;
+    }
+
+    //возможный вариант создавать новые объекты на основе старых
+    SetState& operator+(const SetState& other){
+        std::set<int> new_states;
+        std::set_union(states.begin(), states.end(), other.states.begin(), other.states.end(), new_states.begin());
+        SetState res (new_states);
+        return res;
+    }
+};
+
+//новый составной класс
+class Set_Discrete: public State{
+private:
+    SetState ss;
+    DiscreteState s;
+public:
+    Set_Discrete(DiscreteState s, SetState ss): ss(ss), s(s){}
+
+    bool contains(int t) const override{
+        return ss.contains(t) && s.contains(t); //если точка и там и там
+    }
+};
+
+class Set_Segment: public State{
+private:
+    SetState ss;
+    SegmentState s;
+public:
+    Set_Segment(SegmentState s, SetState ss): ss(ss), s(s){}
+
+    bool contains(int t) const override{
+        return ss.contains(t) && s.contains(t); //если точка и там и там
     }
 };
 
