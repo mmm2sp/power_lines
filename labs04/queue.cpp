@@ -1,12 +1,11 @@
 #include <iostream>
-using namespace std;
+#include <vector>
 
 template <typename T>
 struct Comparator {
     virtual bool operator ()(T const &, T const &) const = 0 ;
 };
 
-//создадим специализацию
 template <>
 struct Comparator<int> {
     bool operator ()(int const &lha , int const &rha ) const{
@@ -14,58 +13,76 @@ struct Comparator<int> {
     }
 };
 
-template <typename T>
-void Heapify(T* array, long index, long size, Comparator<T> comp){
-    if (2*index + 1 > size)
-        return;
-    T left = array[2*index + 1];
-    if (2*index + 2 > size){
-        if (comp(left, array[index]))
-            swap(array[index], array[2 * index + 1]);
-        return;
+template <>
+struct Comparator<double> {
+    bool operator ()(double const &lha , double const &rha ) const{
+        return lha > rha;
     }
-    T right = array[2*index + 2];
-    if (comp(left, array[index])) {
-        if (!comp(right, left)) {
-            swap(array[index], array[2 * index + 1]);
-            Heapify(array, 2 * index + 1, size, comp);
-        }
-    }
-    if (comp(right, array[index])) {
-        if (comp(right, left)) {
-            swap(array[index], array[2 * index + 2]);
-            Heapify(array, 2 * index + 2, size, comp);
-        }
-    }
-    if (!(comp(left, array[index])) && !(comp(right, array[index])))
-        return;
-}
+};
 
 template <typename T>
-void BuildHeap(T* array, long size, Comparator<T> comp){
-    for (long i = size/2; i >= 0; i--)
-        Heapify(array, i, size, comp);
-}
-
-template <typename T>
-void HeapSort(T* array, long size, Comparator<T> comp){
-    BuildHeap(array, size, comp);
-    long HeapSize = size;
-    for (long i = 0; i < size; ++i){
-        swap(array[0], array[HeapSize]);
-        HeapSize--;
-        Heapify(array, 0, HeapSize, comp);
+class PriorityQueue {
+    Comparator<T> comp;
+    std::vector<T> queue;
+public:
+    PriorityQueue(const Comparator<T> & compar){
+        comp = compar;
+        std::vector<T> empty;
+        queue = empty;
     }
-}
+    void push(T element){
+        bool flag = false;
+        for(int i = 0; i < queue.size(); i++){
+            if(comp(element, queue[i])){
+                auto it = queue.begin();
+                queue.insert(std::next(it, i), element);
+                flag = true;
+                break;
+            }
+        }
+        if (!flag){
+            queue.push_back(element);
+        }
+    }
+    T peek(){
+        return queue[0];
+    }
+    void poll(){
+        if (queue.size() == 0) {
+            std::cout << '\n';
+            std::cerr << "There is no elements in queue";
+            return;
+        }
+        for(int i = 0; i < queue.size() - 1; i++){
+            queue[i] = queue[i + 1];
+        }
+        queue.pop_back();
+    }
+
+    bool is_empty(){
+        return queue.empty();
+    }
+
+    void free(){
+        queue.clear();
+    }
+};
 
 int main(){
-    Comparator<int> comp1;
-    int const N = 6;
-    int array[N] = {100, -50, 200 ,6, 40, 1};
-    HeapSort<int>(array, 6, comp1);
-    for (int i = 0; i < N; i++)
-        cout << array[i] << ' ';
-    cout << endl;
-
+    Comparator<double> comp;
+    PriorityQueue<double> Q (comp);
+    Q.push(4.21);
+    Q.push(5.33);
+    Q.push(2.22);
+    Q.push(10.33);
+    std::cout << Q.peek() << '\n';
+    Q.poll();
+    std::cout << Q.peek() << '\n';
+    Q.poll();
+    std::cout << Q.peek() << '\n';
+    Q.poll();
+    std::cout << Q.peek() << '\n';
+    Q.poll();
+    std::cout << Q.is_empty();
     return 0;
 }
