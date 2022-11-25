@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include <vector>
 
 template <typename T>
 class Grid final {
@@ -120,35 +121,46 @@ std::ostream& operator<<(std::ostream& out, const Point& obj){
     return out << '(' << obj.x << ',' << obj.y << ")";
 }
 
-template <typename T, size_t N>
+
+template <typename T, typename ...Tail>
 class Tensor_Grid final {
+private:
+    template <typename U> //создали специализацию
+    void func(const U & head){
+        size.push_back(head);
+        ++dim;
+    }
+
+    template <typename U, typename ...Tail1>
+    void func(const U & head, Tail1... tail){
+        size.push_back(head);
+        ++dim;
+        func(tail...);
+    }
+
 public :
     using value_type = T;
     using size_type = unsigned ;
     T * data ;
-    bool fl = false;
-    size_type* size; //планируется давать массив со стека
+    std::vector<unsigned> size;
+    unsigned dim = 0;
 
-    Tensor_Grid (size_type sizes [N], T const &t){
-        size = sizes;
+    Tensor_Grid (const T &t, Tail... tail){
+        func(tail...);
         size_type length = 1;
-        for(size_t i = 1; i < N; i++){
+        for(size_t i = 1; i < size.size(); i++){
             length *= size[i];
         }
         data = new T[length];
-        for (
-                auto it = data , end = data + length ;
-                it != end; ++it
-                ) * it = t;
+        for (auto it = data , end = data + length ;
+             it != end; ++it)
+            * it = t;
     }
 
-    Tensor_Grid(Tensor_Grid<T, N> const& other){
+    Tensor_Grid(Tensor_Grid<T, Tail...> const& other){
+        size = other.size; //для вектора определен оператор копирующего присваивания
         size_type length = 1;
-        size_type *s = new size_type [N];
-        fl = true;
-        size = s;
-        for(size_t i = 1; i < N; i++){
-            size[i] = other.size[i];
+        for(size_t i = 1; i < size.size(); i++){
             length *= size[i];
         }
         data = new T[length];
@@ -156,26 +168,26 @@ public :
             data[i] = other.data[i];
     };
 
-    Tensor_Grid<T, N>& operator=(Tensor_Grid<T, N>& rha) {
+    Tensor_Grid<T, Tail...>& operator=(Tensor_Grid<T, Tail...>& rha) {
         bool flag = true;
-        for (size_t i = 0; i < N; i++){
+        for (size_t i = 0; i < size.size(); i++){
             if(size[i] != rha.size[i])
                 flag = false;
         }
         if(flag) {
-            Tensor_Grid<T, N> tmp(rha);
+            Tensor_Grid<T, Tail...> tmp(rha);
             std::swap(this->data, tmp.data);
         }
         return *this;
     };
 
-    T operator() (size_type idxes [N]) const{
+    T operator() (const size_type* idxes) const{
         size_type length = 1;
-        for(size_t i = 1; i < N; i++){
+        for(size_t i = 1; i < dim; i++){
             length *= size[i];
         }
         size_type idx = 0;
-        for(size_t i = 0; i < N; i++){
+        for(size_t i = 0; i < dim; i++){
             length = length / size[i];
             idx += idxes[i]*length;
         }
@@ -184,8 +196,6 @@ public :
 
     ~Tensor_Grid(){
         delete[] data;
-        if(fl == true)
-            delete[] size;
     }
 
 };
@@ -234,20 +244,16 @@ int main(){
     std::cout << grid[1][2] << '\n';
 
     std::cout << "----------!!!!!----------\n";
-    unsigned arr[3] = {2,2,2};
-    Tensor_Grid<int, 3> Tens(arr, 5);
+    Tensor_Grid<int, unsigned, unsigned, unsigned> Tens(5, 2, 2, 2); //в примере с семинара не нужно было указывать типы в tail
 
     unsigned idxes[3] = {0,1,1};
     std::cout << Tens(idxes) << '\n';
 
-    Tensor_Grid<int, 3> Tens1(Tens);
+    Tensor_Grid<int, unsigned, unsigned, unsigned> Tens1(Tens);
     std::cout << Tens1(idxes) << '\n';
 
-    unsigned arr1[3] = {2,2,2};
-    Tensor_Grid<int, 3> Tens2(arr1, 3);
+    Tensor_Grid<int, unsigned, unsigned, unsigned> Tens2(3, 2,2,2);
     Tens2 = Tens;
     std::cout << Tens2(idxes);
 
 }
-
-
