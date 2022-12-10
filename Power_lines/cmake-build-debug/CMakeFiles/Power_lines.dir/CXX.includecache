@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/calculate.h
+
+C:/Users/edem2/3_sem_cpp/Power_lines/include/src/calculate.cpp
+iostream
+-
+cmath
+-
+vector
+-
+calculate.h
+C:/Users/edem2/3_sem_cpp/Power_lines/include/src/calculate.h
+

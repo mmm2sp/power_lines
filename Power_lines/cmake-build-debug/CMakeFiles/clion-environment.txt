@@ -1,0 +1,4 @@
+ToolSet: w64 10.0 (local)@C:\Users\edem2\Mingw_1
+Options: 
+
+Options:
